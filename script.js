@@ -1,27 +1,41 @@
-let voices = [];
+let allVoices = [];
 
-function populateVoices() {
-  voices = window.speechSynthesis.getVoices();
+function populateVoicesForLanguage(lang) {
   const voiceSelect = document.getElementById('voiceSelect');
   voiceSelect.innerHTML = '';
+  const filteredVoices = allVoices.filter(v => v.lang === lang);
 
-  voices.forEach((voice, index) => {
+  if (filteredVoices.length === 0) {
+    const option = document.createElement('option');
+    option.text = "No voice found";
+    option.disabled = true;
+    voiceSelect.appendChild(option);
+    return;
+  }
+
+  filteredVoices.forEach((voice, index) => {
     const option = document.createElement('option');
     option.value = index;
-    option.text = `${voice.name} (${voice.lang}) ${voice.gender || ''}`;
+    option.text = `${voice.name} (${voice.lang})`;
     voiceSelect.appendChild(option);
   });
 }
 
-window.speechSynthesis.onvoiceschanged = populateVoices;
-
 function speakText() {
   const text = document.getElementById("textInput").value;
   const lang = document.getElementById("languageSelect").value;
-  const selectedVoice = voices[document.getElementById("voiceSelect").value];
+  const voiceSelect = document.getElementById("voiceSelect");
+  const selectedVoiceIndex = voiceSelect.value;
+  const voicesForLang = allVoices.filter(v => v.lang === lang);
+  const selectedVoice = voicesForLang[selectedVoiceIndex];
 
   if (!text.trim()) {
-    alert("Please enter text first.");
+    alert("Please enter text.");
+    return;
+  }
+
+  if (!selectedVoice) {
+    alert("No voice available for selected language.");
     return;
   }
 
@@ -31,9 +45,19 @@ function speakText() {
 
   window.speechSynthesis.speak(utterance);
 
-  // Download Button is for appearance only (browser API doesn’t support download directly)
   document.getElementById("downloadBtn").classList.remove("hidden");
   document.getElementById("downloadBtn").onclick = () => {
-    alert("Download not supported directly from Web Speech API.\nUse screen recorder or 3rd-party tool.");
+    alert("Audio download not supported directly.\nUse recorder or advanced version.");
   };
 }
+
+window.speechSynthesis.onvoiceschanged = () => {
+  allVoices = window.speechSynthesis.getVoices();
+  const defaultLang = document.getElementById("languageSelect").value;
+  populateVoicesForLanguage(defaultLang);
+};
+
+document.getElementById("languageSelect").addEventListener("change", (e) => {
+  populateVoicesForLanguage(e.target.value);
+});
+
