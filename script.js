@@ -1,63 +1,47 @@
-let allVoices = [];
+function convertTextToSpeech() {
+  const text = document.getElementById("text").value;
+  const language = document.getElementById("language").value;
+  const downloadLink = document.getElementById("downloadLink");
 
-function populateVoicesForLanguage(lang) {
-  const voiceSelect = document.getElementById('voiceSelect');
-  voiceSelect.innerHTML = '';
-  const filteredVoices = allVoices.filter(v => v.lang === lang);
-
-  if (filteredVoices.length === 0) {
-    const option = document.createElement('option');
-    option.text = "No voice found";
-    option.disabled = true;
-    voiceSelect.appendChild(option);
+  // Only allow English for now
+  if (language !== "en") {
+    alert("Currently only English text can be converted.");
     return;
   }
-
-  filteredVoices.forEach((voice, index) => {
-    const option = document.createElement('option');
-    option.value = index;
-    option.text = `${voice.name} (${voice.lang})`;
-    voiceSelect.appendChild(option);
-  });
-}
-
-function speakText() {
-  const text = document.getElementById("textInput").value;
-  const lang = document.getElementById("languageSelect").value;
-  const voiceSelect = document.getElementById("voiceSelect");
-  const selectedVoiceIndex = voiceSelect.value;
-  const voicesForLang = allVoices.filter(v => v.lang === lang);
-  const selectedVoice = voicesForLang[selectedVoiceIndex];
 
   if (!text.trim()) {
-    alert("Please enter text.");
-    return;
-  }
-
-  if (!selectedVoice) {
-    alert("No voice available for selected language.");
+    alert("Please enter some text.");
     return;
   }
 
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = lang;
-  utterance.voice = selectedVoice;
+  utterance.lang = "en-US";
 
-  window.speechSynthesis.speak(utterance);
+  // Set voice based on user selection
+  const voiceType = document.getElementById("voiceType").value;
+  const voiceAge = document.getElementById("voiceAge").value;
 
-  document.getElementById("downloadBtn").classList.remove("hidden");
-  document.getElementById("downloadBtn").onclick = () => {
-    alert("Audio download not supported directly.\nUse recorder or advanced version.");
-  };
+  const voices = speechSynthesis.getVoices();
+
+  const filteredVoices = voices.filter(voice =>
+    voice.lang === "en-US" &&
+    voice.name.toLowerCase().includes(voiceType) &&
+    voice.name.toLowerCase().includes(voiceAge)
+  );
+
+  if (filteredVoices.length > 0) {
+    utterance.voice = filteredVoices[0];
+  }
+
+  // Speak
+  speechSynthesis.speak(utterance);
+
+  // Download as audio file
+  const audio = new Audio();
+  const synth = window.speechSynthesis;
+  const mediaRecorderStream = new MediaStream();
+
+  // For browser security, we can't record directly from speech synthesis.
+  // Use external services for full download (or use a backend later).
+  downloadLink.classList.remove("hidden");
 }
-
-window.speechSynthesis.onvoiceschanged = () => {
-  allVoices = window.speechSynthesis.getVoices();
-  const defaultLang = document.getElementById("languageSelect").value;
-  populateVoicesForLanguage(defaultLang);
-};
-
-document.getElementById("languageSelect").addEventListener("change", (e) => {
-  populateVoicesForLanguage(e.target.value);
-});
-
