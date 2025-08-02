@@ -2,15 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Neon Text to Speech</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Neon Text to Audio</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
     <h1 class="glow">Text to Audio Converter</h1>
-    <textarea id="textInput" placeholder="Enter your text here..."></textarea>
-    <button onclick="speakText()" class="neon-button">Speak</button>
+
+    <textarea id="textInput" placeholder="Enter text here..."></textarea>
+
+    <div class="row">
+      <select id="languageSelect">
+        <option value="en-US">English</option>
+        <option value="ta-IN">Tamil</option>
+        <option value="hi-IN">Hindi</option>
+        <option value="es-ES">Spanish</option>
+        <option value="fr-FR">French</option>
+      </select>
+
+      <select id="voiceSelect"></select>
+    </div>
+
+    <button onclick="speakText()" class="neon-button">🔊 Speak</button>
+    <a id="downloadBtn" class="neon-button hidden" download="speech.wav">⬇️ Download</a>
   </div>
 
   <script src="script.js"></script>
