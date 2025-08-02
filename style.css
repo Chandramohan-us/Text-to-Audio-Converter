@@ -75,4 +75,15 @@ select {
 
 .hidden {
   display: none;
+  .footer {
+  position: fixed;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  color: #0ff;
+  font-size: 1em;
+  text-shadow: 0 0 3px #0ff, 0 0 6px #0ff, 0 0 12px #0ff;
+  opacity: 0.7;
+}
+
 }
