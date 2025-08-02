@@ -1,47 +1,73 @@
-function convertTextToSpeech() {
-  const text = document.getElementById("text").value;
-  const language = document.getElementById("language").value;
-  const downloadLink = document.getElementById("downloadLink");
+const API_KEY = "AIzaSyBBXBkOmka3nWoa2O_WqX5zHW_RiMEuDqw";
 
-  // Only allow English for now
-  if (language !== "en") {
-    alert("Currently only English text can be converted.");
-    return;
+// Translate using Gemini API
+async function translateToEnglish(inputText, sourceLang) {
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: `Translate this to English: ${inputText}` }]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text || inputText;
+  } catch (error) {
+    console.error("Translation error:", error);
+    return inputText;
   }
+}
 
-  if (!text.trim()) {
+async function convertTextToSpeech() {
+  const textInput = document.getElementById("text").value;
+  const language = document.getElementById("language").value;
+  const voiceType = document.getElementById("voiceType").value;
+  const voiceAge = document.getElementById("voiceAge").value;
+
+  if (!textInput.trim()) {
     alert("Please enter some text.");
     return;
   }
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
+  let finalText = textInput;
 
-  // Set voice based on user selection
-  const voiceType = document.getElementById("voiceType").value;
-  const voiceAge = document.getElementById("voiceAge").value;
-
-  const voices = speechSynthesis.getVoices();
-
-  const filteredVoices = voices.filter(voice =>
-    voice.lang === "en-US" &&
-    voice.name.toLowerCase().includes(voiceType) &&
-    voice.name.toLowerCase().includes(voiceAge)
-  );
-
-  if (filteredVoices.length > 0) {
-    utterance.voice = filteredVoices[0];
+  // Translate if not English
+  if (language !== "en") {
+    finalText = await translateToEnglish(textInput, language);
   }
 
-  // Speak
+  const utterance = new SpeechSynthesisUtterance(finalText);
+  utterance.lang = "en-US";
+
+  // Match voice type and age using name keywords (limited to what's available)
+  const voices = speechSynthesis.getVoices();
+  const voiceKeyword = `${voiceType} ${voiceAge}`.toLowerCase();
+  const selectedVoice = voices.find(v =>
+    v.name.toLowerCase().includes(voiceType) ||
+    v.name.toLowerCase().includes(voiceAge)
+  );
+
+  if (selectedVoice) utterance.voice = selectedVoice;
+
+  // Speak the text
   speechSynthesis.speak(utterance);
 
-  // Download as audio file
-  const audio = new Audio();
-  const synth = window.speechSynthesis;
-  const mediaRecorderStream = new MediaStream();
+  // Create downloadable audio (via SpeechSynthesis workaround)
+  utterance.onend = () => {
+    createAudioDownload(finalText);
+  };
+}
 
-  // For browser security, we can't record directly from speech synthesis.
-  // Use external services for full download (or use a backend later).
+function createAudioDownload(text) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  const audioBlob = new Blob([text], { type: 'text/plain' }); // Placeholder for actual audio
+  const url = URL.createObjectURL(audioBlob);
+  const downloadLink = document.getElementById("downloadLink");
+  downloadLink.href = url;
   downloadLink.classList.remove("hidden");
 }
