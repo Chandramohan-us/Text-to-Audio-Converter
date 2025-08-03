@@ -1,35 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Neon Text to Audio</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Text to Audio - CM</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <footer class="footer">by CM</footer>
   <div class="container">
-    <h1 class="glow">Text to Audio Converter</h1>
-
-    <textarea id="textInput" placeholder="Enter text here..."></textarea>
-
-    <div class="row">
-      <select id="languageSelect">
-       <option value="ta-IN">Tamil</option>
-        <option value="hi-IN">Hindi</option>
-        <option value="te-IN">Telugu</option>
-        <option value="kn-IN">Kannada</option>
-        <option value="ml-IN">Malayalam</option>
-        <option value="en-US" selected>English</option>
-      </select>
-
-      <select id="voiceSelect"></select>
-    </div>
-
-    <button onclick="speakText()" class="neon-button">🔊 Speak</button>
-    <a id="downloadBtn" class="neon-button hidden" download="speech.wav">⬇️ Download</a>
+    <h1>Text to Audio Converter 🔊</h1>
+    <textarea id="textInput" placeholder="Type or paste text here..."></textarea>
+    <button onclick="convertToAudio()">🔁 Convert to Audio</button>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
+
